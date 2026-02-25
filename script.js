@@ -2,16 +2,28 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 const box = 20;
+
+// Load images (same folder)
+const headImg = new Image();
+headImg.src = "head.png";
+
+const bodyImg = new Image();
+bodyImg.src = "body.png";
+
+const foodImg = new Image();
+foodImg.src = "food.png";
+
+// Snake initial state
 let snake = [{ x: 200, y: 200 }];
 let direction = "RIGHT";
 
-let food = {
-    x: Math.floor(Math.random() * 20) * box,
-    y: Math.floor(Math.random() * 20) * box
-};
+// Food
+let food = generateFood();
 
+// Score
 let score = 0;
 
+// Controls
 document.addEventListener("keydown", changeDirection);
 
 function changeDirection(event) {
@@ -21,20 +33,31 @@ function changeDirection(event) {
     else if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
 }
 
+// Generate food
+function generateFood() {
+    return {
+        x: Math.floor(Math.random() * (canvas.width / box)) * box,
+        y: Math.floor(Math.random() * (canvas.height / box)) * box
+    };
+}
+
+// Main game loop
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw snake
     snake.forEach((part, index) => {
-        ctx.fillStyle = index === 0 ? "lime" : "green";
-        ctx.fillRect(part.x, part.y, box, box);
+        if (index === 0) {
+            ctx.drawImage(headImg, part.x, part.y, box, box);
+        } else {
+            ctx.drawImage(bodyImg, part.x, part.y, box, box);
+        }
     });
 
     // Draw food
-    ctx.fillStyle = "red";
-    ctx.fillRect(food.x, food.y, box, box);
+    ctx.drawImage(foodImg, food.x, food.y, box, box);
 
-    // Snake movement
+    // Move snake
     let headX = snake[0].x;
     let headY = snake[0].y;
 
@@ -51,6 +74,7 @@ function drawGame() {
     ) {
         alert("Game Over! Score: " + score);
         location.reload();
+        return;
     }
 
     let newHead = { x: headX, y: headY };
@@ -58,10 +82,7 @@ function drawGame() {
     // Eat food
     if (headX === food.x && headY === food.y) {
         score++;
-        food = {
-            x: Math.floor(Math.random() * 20) * box,
-            y: Math.floor(Math.random() * 20) * box
-        };
+        food = generateFood();
     } else {
         snake.pop();
     }
@@ -69,5 +90,5 @@ function drawGame() {
     snake.unshift(newHead);
 }
 
-// Game loop
+// Start game
 setInterval(drawGame, 150);
